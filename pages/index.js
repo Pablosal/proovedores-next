@@ -1,65 +1,150 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
-
+import { useContext, useEffect, useState } from "react";
+import { newFirebase } from "../utils/context";
+import { firebaseContext } from "../utils/context/contextFirebase";
+import ProviderMiniLayout from "../layout/ProviderMiniLayout";
+import ProductDisplayCard from "../layout/ProductDisplayCard";
+import Backdrop from "../layout/modal/Backdrop";
+import Layout from "../layout/Layout";
+import frutos from "../utils/info/frutos.json";
+import Modal from "../layout/modal/Modal";
+import Image from "next/image";
 export default function Home() {
+  const [buscar, setBuscar] = useState("Cacahuate");
+  const { profileAvatar } = useContext(firebaseContext);
+  const [productos, setProductos] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+useEffect(()=>{ console.log(usuarios);},[usuarios])
+  useEffect(() => {
+   
+    newFirebase
+      .db()
+      .collection(buscar)
+      .get()
+      .then((docs) => {
+        setProductos(docs.docs.map((a) => ({ ...a.data(), id: docs.docs.Id })));
+      })
+      .catch((err) => console.error(err));
+
+    newFirebase.db().collection("users").where("proovedor", "==", "true");
+    newFirebase
+      .db()
+      .collection("users")
+      .where("productos", "==", buscar)
+      .get()
+      .then((docs) => {
+        // console.log(docs.docs.map((documento) => documento.id));
+        setUsuarios(docs.docs.map((a) => ({ ...a.data(), id: a.id })));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [buscar]);
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+    <Layout>
+      <div style={{width:"100%", overflowX:"hidden"}}>
+        <div
+          style={{
+            height: "100vh",
+            background:
+              "url(/images/pexel-chen.jpg) no-repeat center fixed ",
+            backgroundSize: "cover",
+            overflowX: "hidden",
+            maxWidth: "100vw",
+          }}
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+          <div
+            style={{
+              backgroundColor: "rgba(1,1,1,0.7)",
+              height: "100%",
+              position: "absolute",
+              display: "flex",
+              left:0,
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <h1 style={{ textAlign: "center", margin: "15px", color: "white" }}>
+              ¿Iniciando un negocio pero no encuentras proviciones? Encuentra
+              los Mejores Proovedores De Fruto Secos Nacionales
+            </h1>
+            <form className="productForm">
+              <select
+                name="productos"
+                id="productos"
+                value={buscar}
+                style={{ padding: "5px" }}
+                onChange={(e) => setBuscar(e.target.value)}
+              >
+                {frutos &&
+                  frutos.Categorias.map((fruto) => (
+                    <option key={fruto} value={fruto}>
+                      {fruto}
+                    </option>
+                  ))}
+              </select>
+            </form>
+          </div>
+        </div>
+        <h2
+          style={{
+            padding: "8px",
+            color: "black",
+            textAlign: "center",
+            margin: "15px",
+          }}
+        >
+          Proovedores de {buscar ? `${buscar}` : "Generales"}
+        </h2>
+        <div
+          style={{
+            width: "100vw",
+            padding: "0",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {productos.length ? (
+            productos.map((p) => (
+              <ProductDisplayCard key={p.nombre} descripcion={p} />
+            ))
+          ) : (
+            <h1>No hay productos</h1>
+          )}
+        </div>
+
+        <h2
+          style={{
+            margin: "10px",
+            padding: "8px",
+            color: "black",
+            textAlign: "center",
+          }}
+        >
+          Proovedores de {buscar ? `${buscar}` : "Generales"}
+        </h2>
+        <div
+          style={{
+            width: "100vw",
+            padding: "0",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {usuarios ? (
+            usuarios.map((p) => (
+              <ProviderMiniLayout
+                key={p.id}
+                id={p.id}
+                p={p}
+                image={profileAvatar}
+              ></ProviderMiniLayout>
+            ))
+          ) : (
+            <h1>Cargando...</h1>
+          )}
+        </div>
+      </div>
+    </Layout>
+  );
 }

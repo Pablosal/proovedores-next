@@ -1,0 +1,19 @@
+.titleCenter{
+    text-align: center;
+}
+.divContainer{
+    background-color: #182E49;
+color: white;
+display: flex;
+align-items: space-evenly;
+justify-content: center;
+flex-direction: column;
+height: 100%;
+width:100%;
+margin: 0 auto;
+padding: 15px;}
+
+.divContainerSubSection{
+    margin: 10px;
+    color: white;
+    }
