@@ -134,5 +134,9 @@ const NuevoProducto = () => {
     </Layout>
   );
 };
-
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}
 export default NuevoProducto;
